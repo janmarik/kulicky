@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Katalog přesných borosilikátových kuliček | Technický vyhledávač</title>
+  <meta name="description" content="Přesné borosilikátové skleněné kuličky Typ I (USP / Ph. Eur.) pro farmaceutický průmysl. Průměry 2,5 mm, 3,969 mm (5/32 palce) a další rozměry na míru.">
+  <style>
+    :root {
+      --primary: #0f172a;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      background-color: var(--primary);
+      color: #ffffff;
+      padding: 40px 24px;
+    }
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    header p {
+      color: #94a3b8;
+      font-size: 16px;
+      max-width: 720px;
+    }
+    .filter-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: -24px auto 24px auto;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+    }
+    .filter-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .filter-group select, .filter-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      background-color: #ffffff;
+    }
+    .filter-group select:focus, .filter-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .results-count {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .table-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th {
+      background-color: #f1f5f9;
+      padding: 14px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: #f8fafc; }
+    .dim-badge {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--primary);
+      display: block;
+    }
+    .dim-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+    }
+    .btn-primary:hover { background-color: var(--accent-hover); }
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #cbd5e1;
+      color: var(--text);
+      margin-right: 6px;
+    }
+    .btn-outline:hover { background-color: #f1f5f9; }
+    .custom-banner {
+      margin-top: 32px;
+      margin-bottom: 48px;
+      background: var(--primary);
+      color: #ffffff;
+      border-radius: 12px;
+      padding: 28px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .custom-banner h2 {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .custom-banner p {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    /* Modal pro detail rozměru (simulace Programmatic SEO landing page) */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal {
+      background: #ffffff;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    .spec-item span { display: block; font-size: 12px; color: var(--muted); }
+    .spec-item strong { font-size: 14px; color: var(--primary); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <h1>Katalog přesných skleněných kuliček</h1>
+      <p>Vyhledávání dle přesného průměru, materiálu a farmaceutických norem. Vyrábíme jakékoliv průměry a tolerance dle požadavků zákazníka.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Filtrační lišta -->
+    <section class="filter-panel" aria-label="Filtr rozměrů a specifikací">
+      <div class="filter-group">
+        <label for="searchInput">Hledat rozměr (mm / palce)</label>
+        <input type="text" id="searchInput" placeholder="např. 3,969 nebo 2,5 nebo 5/32">
+      </div>
+      <div class="filter-group">
+        <label for="materialFilter">Materiál</label>
+        <select id="materialFilter">
+          <option value="all">Všechny materiály</option>
+          <option value="boro1">Borosilikátové sklo Typ I (USP / Ph. Eur.)</option>
+          <option value="soda">Sodno-draselné sklo (Soda-Lime)</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="toleranceFilter">Tolerance / Sfericita</label>
+        <select id="toleranceFilter">
+          <option value="all">Všechny tolerance</option>
+          <option value="0.01">±0,01 mm (Ultra-Precision)</option>
+          <option value="0.02">±0,02 mm (Pharma Standard)</option>
+          <option value="0.05">±0,05 mm (Industrial)</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="appFilter">Použití</label>
+        <select id="appFilter">
+          <option value="all">Všechny aplikace</option>
+          <option value="insulin">Inzulinové patrony (NPH / Premix)</option>
+          <option value="glp1">GLP-1 a dvoukomorové systémy</option>
+          <option value="valves">Dávkovací ventily a pumpy</option>
+          <option value="cosmetics">Kosmetika a laky</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="results-header">
+      <span class="results-count" id="resultsCount">Zobrazeno 6 položek</span>
+      <button class="btn btn-outline" id="resetBtn">Vymazat filtry</button>
+    </div>
+
+    <!-- Výsledková tabulka -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Průměr</th>
+            <th>Materiál &amp; Norma</th>
+            <th>Tolerance</th>
+            <th>Typické použití</th>
+            <th>Dokumentace &amp; Poptávka</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Generováno přes JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Banner pro zakázkové rozměry -->
+    <section class="custom-banner">
+      <div>
+        <h2>Nenašli jste svůj přesný rozměr?</h2>
+        <p>Vyrábíme jakékoliv průměry (od 0,5 mm do 15 mm) a specifické tolerance dle výkresové dokumentace zákazníka.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openInquiry('Zakázkový rozměr dle specifikace')">Poptat vlastní rozměr</button>
+    </section>
+  </main>
+
+  <!-- Detail / Landing Page náhled -->
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <span style="font-size:12px; color:#0284c7; font-weight:700;" id="modalSlug">URL: /katalog/...</span>
+          <h3 id="modalTitle" style="font-size:20px; margin-top:4px;">Detail položky</h3>
+        </div>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <p id="modalDesc" style="font-size:14px; color:#475569;"></p>
+      <div class="spec-grid" id="modalSpecs"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button class="btn btn-outline" onclick="closeModal()">Zavřít</button>
+        <button class="btn btn-primary" id="modalInquiryBtn">Odeslat nezávaznou poptávku</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const catalogData = [
+      {
+        id: "2-5mm",
+        slug: "vasweb.cz/katalog/borosilikatove-kulicky-2-5mm",
+        diameter: "2,500 mm",
+        imperial: "0.0984 in",
+        materialCode: "boro1",
+        materialName: "Borosilikátové sklo Typ I (USP / Ph. Eur.)",
+        toleranceCode: "0.02",
+        toleranceName: "±0,02 mm",
+        appCode: "insulin",
+        appName: "Inzulinové patrony (NPH / Premix), 100% AOI LUNA Optik",
+        tdsFile: "TDS-Borosilicate-Glass-Beads-2.5mm-Type-I.pdf",
+        desc: "Standardizovaná míchací kulička pro 3ml skleněné patrony (cartridge). Ověřeno pro automatizované plnicí linky a 100% optickou kontrolu mikrotrhlin."
+      },
+      {
+        id: "3-969mm",
+        slug: "vasweb.cz/katalog/sklenena-kulicka-3-969mm-typ-i",
+        diameter: "3,969 mm",
+        imperial: "5/32 in (0.15625 in)",
+        materialCode: "boro1",
+        materialName: "Borosilikátové sklo Typ I (USP / Ph. Eur.)",
+        toleranceCode: "0.01",
+        toleranceName: "±0,01 mm",
+        appCode: "valves",
+        appName: "Dávkovací ventily, zpětné klapky a farmaceutické pumpy",
+        tdsFile: "TDS-Borosilicate-Glass-Beads-3.969mm-Type-I.pdf",
+        desc: "Vysoce přesná palcová kulička (5/32 palce) z neutrálního borosilikátového skla HGB 1 pro zpětné ventily, dávkovače a laboratorní přístroje."
+      },
+      {
+        id: "2-0mm",
+        slug: "vasweb.cz/katalog/borosilikatove-kulicky-2-0mm-glp1",
+        diameter: "2,000 mm",
+        imperial: "0.0787 in",
+        materialCode: "boro1",
+        materialName: "Borosilikátové sklo Typ I (USP / Ph. Eur.)",
+        toleranceCode: "0.02",
+        toleranceName: "±0,02 mm",
+        appCode: "glp1",
+        appName: "GLP-1 a dvoukomorové systémy (Dual Chamber Cartridges)",
+        tdsFile: "TDS-Borosilicate-Glass-Beads-2.0mm-Type-I.pdf",
+        desc: "Kompaktní míchací kulička určená pro rychlou rekonstituci lyofilizovaných peptidů a GLP-1 analog v dvoukomorových patronách."
+      },
+      {
+        id: "3-0mm",
+        slug: "vasweb.cz/katalog/borosilikatove-kulicky-3-0mm",
+        diameter: "3,000 mm",
+        imperial: "0.1181 in",
+        materialCode: "boro1",
+        materialName: "Borosilikátové sklo Typ I (USP / Ph. Eur.)",
+        toleranceCode: "0.02",
+        toleranceName: "±0,02 mm",
+        appCode: "glp1",
+        appName: "Dvoukomorové patrony, růstové hormony a viskózní suspenze",
+        tdsFile: "TDS-Borosilicate-Glass-Beads-3.0mm-Type-I.pdf",
+        desc: "Vyšší hmotnost kuličky pro efektivní homogenizaci hustších suspenzí a lyofilizovaných léčiv před injekční aplikací."
+      },
+      {
+        id: "3-175mm",
+        slug: "vasweb.cz/katalog/sklenena-kulicka-3-175mm-1-8-inch",
+        diameter: "3,175 mm",
+        imperial: "1/8 in (0.1250 in)",
+        materialCode: "boro1",
+        materialName: "Borosilikátové sklo Typ I (USP / Ph. Eur.)",
+        toleranceCode: "0.01",
+        toleranceName: "±0,01 mm",
+        appCode: "valves",
+        appName: "Přesné ventily, rozprašovače a analytická technika",
+        tdsFile: "TDS-Borosilicate-Glass-Beads-3.175mm-Type-I.pdf",
+        desc: "Přesná palcová specifikace (1/8 palce) s garantovanou sfericitou pro těsnicí sedla farmaceutických rozprašovačů."
+      },
+      {
+        id: "4-0mm",
+        slug: "vasweb.cz/katalog/sodno-draselne-kulicky-4-0mm",
+        diameter: "4,000 mm",
+        imperial: "0.1575 in",
+        materialCode: "soda",
+        materialName: "Sodno-draselné sklo (Soda-Lime)",
+        toleranceCode: "0.05",
+        toleranceName: "±0,05 mm",
+        appCode: "cosmetics",
+        appName: "Kosmetika, laky na nehty, roll-on aplikátory",
+        tdsFile: "TDS-Soda-Lime-Glass-Beads-4.0mm.pdf",
+        desc: "Ekonomické míchací kuličky pro kosmetický průmysl a neparenterální aplikace."
+      }
+    ];
+
+    const tableBody = document.getElementById("tableBody");
+    const resultsCount = document.getElementById("resultsCount");
+    const searchInput = document.getElementById("searchInput");
+    const materialFilter = document.getElementById("materialFilter");
+    const toleranceFilter = document.getElementById("toleranceFilter");
+    const appFilter = document.getElementById("appFilter");
+
+    function renderTable(items) {
+      tableBody.innerHTML = "";
+      resultsCount.textContent = `Zobrazeno ${items.length} z ${catalogData.length} položek`;
+
+      if (items.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align:center; padding:32px; color:#64748b;">
+              Pro zadaný filtr nebyl nalezen žádný skladový rozměr. <strong>Vyrábíme však jakékoliv průměry na zakázku</strong> – využijte tlačítko níže.
+            </td>
+          </tr>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            <span class="dim-badge">${item.diameter}</span>
+            <span class="dim-sub">${item.imperial}</span>
+          </td>
+          <td>${item.materialName}</td>
+          <td><strong>${item.toleranceName}</strong></td>
+          <td>${item.appName}</td>
+          <td>
+            <button class="btn btn-outline" onclick="openDetail('${item.id}')">Detail / TDS</button>
+            <button class="btn btn-primary" onclick="openInquiry('${item.diameter} – ${item.materialName}')">Poptat</button>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function applyFilters() {
+      const query = searchInput.value.toLowerCase().replace(".", ",").trim();
+      const mat = materialFilter.value;
+      const tol = toleranceFilter.value;
+      const app = appFilter.value;
+
+      const filtered = catalogData.filter(item => {
+        const matchQuery = !query ||
+          item.diameter.toLowerCase().includes(query) ||
+          item.imperial.toLowerCase().includes(query) ||
+          item.appName.toLowerCase().includes(query);
+        const matchMat = mat === "all" || item.materialCode === mat;
+        const matchTol = tol === "all" || item.toleranceCode === tol;
+        const matchApp = app === "all" || item.appCode === app;
+        return matchQuery && matchMat && matchTol && matchApp;
+      });
+
+      renderTable(filtered);
+    }
+
+    function openDetail(id) {
+      const item = catalogData.find(x => x.id === id);
+      if (!item) return;
+      document.getElementById("modalSlug").textContent = `Programmatic SEO URL: ${item.slug}`;
+      document.getElementById("modalTitle").textContent = `Borosilikátová kulička ${item.diameter} (${item.imperial})`;
+      document.getElementById("modalDesc").textContent = item.desc;
+      document.getElementById("modalSpecs").innerHTML = `
+        <div class="spec-item"><span>Průměr</span><strong>${item.diameter} (${item.imperial})</strong></div>
+        <div class="spec-item"><span>Tolerance</span><strong>${item.toleranceName}</strong></div>
+        <div class="spec-item"><span>Materiál</span><strong>${item.materialName}</strong></div>
+        <div class="spec-item"><span>Technický list (PDF)</span><strong>${item.tdsFile}</strong></div>
+      `;
+      document.getElementById("modalInquiryBtn").onclick = () => {
+        closeModal();
+        openInquiry(`${item.diameter} – ${item.materialName}`);
+      };
+      document.getElementById("detailModal").classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("detailModal").classList.remove("active");
+    }
+
+    function openInquiry(specText) {
+      alert(`Otevírá se poptávkový formulář pro položku:\n${specText}\n\n(Zde bude napojen váš firemní kontaktní formulář s předvyplněným parametrem.)`);
+    }
+
+    searchInput.addEventListener("input", applyFilters);
+    materialFilter.addEventListener("change", applyFilters);
+    toleranceFilter.addEventListener("change", applyFilters);
+    appFilter.addEventListener("change", applyFilters);
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      searchInput.value = "";
+      materialFilter.value = "all";
+      toleranceFilter.value = "all";
+      appFilter.value = "all";
+      renderTable(catalogData);
+    });
+
+    // Inicializace
+    renderTable(catalogData);
+  </script>
+</body>
+</html>
